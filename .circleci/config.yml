@@ -1,0 +1,42 @@
+workflows:
+  version: 2.1
+  my-workflow:
+    jobs:
+      - generate-tfc-token
+      - tf-test:
+          requires:
+            - generate-tfc-token
+      - slack-notifiacatoin-revoking:
+          requires:
+            - generate-tfc-token
+      - generate-azure-secret:
+          requires:
+            - tf-test
+      - provison:
+          requires:
+            - generate-azure-secret
+      - slack-notifiacatoin-terraform:
+          requires:
+            - provison
+version: 2.1
+executors:
+  tf-executor:
+    docker:
+      - image: hashicorp/terraform
+    working_directory: /tmp
+  vault-executor:
+    docker:
+      - image: hashicorp/vault
+    working_directory: /tmp
+jobs:
+  generate-tfc-token:
+    executor: my-executor
+    steps:
+      - run: mkdir -p workspace
+      - run:
+          name: "Pull Approle Secret ID & Role ID"
+          command: |
+      - persist_to_workspace:
+          root: workspace
+          paths:
+            - ids-output.json
