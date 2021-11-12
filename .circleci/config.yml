@@ -3,21 +3,6 @@ workflows:
   my-workflow:
     jobs:
       - generate-tfc-token
-      - tf-test:
-          requires:
-            - generate-tfc-token
-      - slack-notifiacatoin-revoking:
-          requires:
-            - generate-tfc-token
-      - generate-azure-secret:
-          requires:
-            - tf-test
-      - provison:
-          requires:
-            - generate-azure-secret
-      - slack-notifiacatoin-terraform:
-          requires:
-            - provison
 version: 2.1
 executors:
   tf-executor:
