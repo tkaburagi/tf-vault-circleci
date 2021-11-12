@@ -8,9 +8,11 @@ executors:
   tf-executor:
     docker:
       - image: hashicorp/terraform
+    working_directory: ~
   vault-executor:
     docker:
       - image: hashicorp/vault
+    working_directory: ~
 jobs:
   generate-tfc-token:
     executor: vault-executor
