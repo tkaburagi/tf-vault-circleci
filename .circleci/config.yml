@@ -1,6 +1,6 @@
 workflows:
   version: 2.1
-  my-workflow:
+  azure-infra-provision:
     jobs:
       - generate-tfc-token
 version: 2.1
@@ -12,7 +12,7 @@ executors:
   vault-executor:
     docker:
       - image: hashicorp/vault
-    working_directory: /tmp
+    working_directory: /home/vault
 jobs:
   generate-tfc-token:
     executor: vault-executor
