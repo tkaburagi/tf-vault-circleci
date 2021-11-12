@@ -30,7 +30,7 @@ executors:
     working_directory: /tmp
 jobs:
   generate-tfc-token:
-    executor: my-executor
+    executor: vault-executor
     steps:
       - run: mkdir -p workspace
       - run:
