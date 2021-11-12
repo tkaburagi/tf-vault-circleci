@@ -17,6 +17,7 @@ jobs:
   generate-tfc-token:
     executor: vault-executor
     steps:
+      - run: mkdir -p workspace
       - run:
           name: "Import TFC API Token from Vault"
           command: |
