@@ -23,7 +23,7 @@ jobs:
           command: |
             pwd
             vault -version
-            vault read azure/roles/contributor
+            vault kv get secret/azure/environment
 #      - persist_to_workspace:
 #          root: workspace
 #          paths:
