@@ -21,7 +21,9 @@ jobs:
       - run:
           name: "Import TFC API Token from Vault"
           command: |
+            pwd
             vault -version
+            vault read azure/roles/contributor
 #      - persist_to_workspace:
 #          root: workspace
 #          paths:
