@@ -65,6 +65,7 @@ jobs:
           name: "Import Azure Secrets from Vault"
           command: |
             pwd
+            apk add jq
             vault read -format json azure/creds/contributor > client-creds.json
             vault kv get -format json secret/azure/environment > env-creds.json
 
