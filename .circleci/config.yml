@@ -80,7 +80,7 @@ jobs:
           paths:
             - env-creds.json
             - client-creds.json
-  provison-infra:
+  provision-infra:
     executor: terraform-executor
     steps:
       - attach_workspace:
