@@ -48,15 +48,12 @@ jobs:
             pwd
             vault -version
             apk add jq
-            export TFC_TOKEN=$(vault read -format json tfc/creds/ci-user | jq -r '.data.token')
 
-            echo "{" > workspace/tf-token-output.json
-            echo "  \"tfc_token\": \"${TFC_TOKEN}\"," >> workspace/tf-token-output.json
-            echo "}" >> workspace/tf-token-output.json
+            vault read -format json tfc/creds/ci-use > workspace/tf-token.json
       - persist_to_workspace:
           root: workspace
           paths:
-            - tf-token-output.json
+            - tf-token.json
   generate-azure-secret:
     executor: vault-executor
     steps:
@@ -70,11 +67,6 @@ jobs:
             apk add jq
             vault read -format json azure/creds/contributor > workspace/client-creds.json
             vault kv get -format json secret/azure/environment > workspace/env-creds.json
-
-            export ARM_CLIENT_ID=$(cat workspace/client-creds.json | jq -r '.data.client_id')
-            export ARM_CLIENT_SECRET=$(cat workspace/client-creds.json | jq -r '.data.client_secret')
-            export ARM_SUBSCRIPTION_ID=$(cat workspace/env-creds.json | jq -r '.data.data.subscription_id')
-            export ARM_TENANT_ID=$(cat workspace/env-creds.json | jq -r '.data.data.tenant_id')
       - persist_to_workspace:
           root: workspace
           paths:
@@ -88,5 +80,44 @@ jobs:
       - run:
           name: "Make TFC"
           command: |
-            ls -ltrR /tmp/workspace
+
+            export TFC_TOKEN=$(cat /tmp/workspace/tf-token.json | jq -r '.data.token')
+            export ARM_CLIENT_ID=$(cat /tmp/workspace/client-creds.json | jq -r '.data.client_id')
+            export ARM_CLIENT_SECRET=$(cat /tmp/workspace/client-creds.json | jq -r '.data.client_secret')
+            export ARM_SUBSCRIPTION_ID=$(cat /tmp/workspace/env-creds.json | jq -r '.data.data.subscription_id')
+            export ARM_TENANT_ID=$(cat /tmp/workspace/env-creds.json | jq -r '.data.data.tenant_id')
+
+            curl \
+            --header "Authorization: Bearer ${TFC_TOKEN}" \
+            --header "Content-Type: application/vnd.api+json" \
+              https://app.terraform.io/api/v2/workspaces/${WS_ID} | jq -r '.data.relationships.organization.data.id' > org-name
+
+            curl \
+            --header "Authorization: Bearer ${TFC_TOKEN}" \
+            --header "Content-Type: application/vnd.api+json" \
+              https://app.terraform.io/api/v2/workspaces/${WS_ID} | jq -r '.data.attributes.name' > ws-name
+
+            WS_NAME=$(cat ws-name)
+            ORG_NAME=$(cat org-name)
+
+            cat << EOF > main.tf
+            terraform {
+              backend "remote" {
+                organization = "${ORG_NAME}"
+                workspaces {
+                  name = "${WS_NAME}"
+                }
+              }
+            }
+
+            provider "azurerm" {
+              features {}
+            }
+            EOF
+
+            cat main.tf
+            ls -ltrR
+
+
             rm /tmp/workspace/*.json
+            ls -ltrR /tmp/workspace
