@@ -83,17 +83,14 @@ jobs:
 
             export TF_CLI_CONFIG_FILE=.terraformrc
             export TFE_TOKEN=${TFC_TOKEN}
-            export TF_VAR_workspace_id=${WS_ID}
-            export TF_VAR_arm_client_id=${ARM_CLIENT_ID}
-            export TF_VAR_arm_client_secret=${ARM_CLIENT_SECRET}
-            export TF_VAR_arm_tenant_id=${ARM_TENANT_ID}
-            export TF_VAR_arm_sub_id=${ARM_SUBSCRIPTION_ID}
-
-            echo ${TF_VAR_workspace_id}
-
             terraform init
-            terraform apply -auto-approve
-
+            terraform apply \
+              -var workspace_id=${WS_ID} \
+              -var arm_client_id=${ARM_CLIENT_ID} \
+              -var arm_client_secret=${ARM_CLIENT_SECRET} \
+              -var arm_tenant_id=${ARM_TENANT_ID} \
+              -var arm_sub_id=${ARM_SUBSCRIPTION_ID} \
+              -auto-approve
   provision-infra:
     executor: tf-executor
     steps:
