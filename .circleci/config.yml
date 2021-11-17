@@ -78,6 +78,7 @@ jobs:
       - run:
           name: "Make TFC"
           command: |
+            apk add jq
             export TFC_TOKEN=$(cat /tmp/workspace/tf-token.json | jq -r '.data.token')
             export ARM_CLIENT_ID=$(cat /tmp/workspace/client-creds.json | jq -r '.data.client_id')
             export ARM_CLIENT_SECRET=$(cat /tmp/workspace/client-creds.json | jq -r '.data.client_secret')
