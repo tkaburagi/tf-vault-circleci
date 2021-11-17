@@ -117,7 +117,5 @@ jobs:
             cat main.tf
             ls -ltrR
 
-
-
             rm /tmp/workspace/*.json
             ls -ltrR /tmp/workspace
