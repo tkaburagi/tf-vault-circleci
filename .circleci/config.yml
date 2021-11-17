@@ -51,6 +51,7 @@ jobs:
             git clone https://github.com/tkaburagi/tf-vault-github-actions-src
             terraform -version
             ls -ltrR
+            cd tf-vault-github-actions-src
             terraform fmt -diff=true
             terraform init
             terraform validate
