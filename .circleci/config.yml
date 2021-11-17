@@ -47,7 +47,7 @@ jobs:
           command: |
             pwd
             terraform -version
-            ls -ltr
+            ls -ltrR
             terraform fmt -diff=true
             terraform init
             terraform validate
