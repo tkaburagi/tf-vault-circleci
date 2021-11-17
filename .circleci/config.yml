@@ -81,7 +81,7 @@ jobs:
             - env-creds.json
             - client-creds.json
   provision-infra:
-    executor: terraform-executor
+    executor: tf-executor
     steps:
       - attach_workspace:
           at: /tmp/workspace
