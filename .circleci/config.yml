@@ -61,6 +61,7 @@ jobs:
     steps:
       - attach_workspace:
           at: /tmp/workspace
+      - run: mkdir workspace
       - run:
           name: "Import Azure Secrets from Vault"
           command: |
@@ -74,12 +75,19 @@ jobs:
             export ARM_SUBSCRIPTION_ID=$(cat env-creds.json | jq -r '.data.data.subscription_id')
             export ARM_TENANT_ID=$(cat env-creds.json | jq -r '.data.data.tenant_id')
 
-            echo ${ARM_CLIENT_ID}
-            echo ${ARM_SUBSCRIPTION_ID}
-
             ls -ltrR /tmp/workspace
       - persist_to_workspace:
           root: workspace
           paths:
             - env-creds.json
             - client-creds.json
+  provison-infra:
+    executor: terraform-executor
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - run: mkdir workspace
+      - run:
+          name: "Make TFC"
+          commad: |
+            ls -ltrR /tmp/workspace
