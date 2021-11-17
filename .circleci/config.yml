@@ -55,6 +55,7 @@ jobs:
   generate-azure-secret:
     executor: vault-executor
     steps:
+      - checkout
       - attach_workspace:
           at: /tmp/workspace
       - run: mkdir workspace
@@ -65,11 +66,32 @@ jobs:
             apk add jq
             vault read -format json azure/creds/contributor > workspace/client-creds.json
             vault kv get -format json secret/azure/environment > workspace/env-creds.json
-      - persist_to_workspace:
-          root: workspace
-          paths:
-            - env-creds.json
-            - client-creds.json
+
+            export TFC_TOKEN=$(cat /tmp/workspace/tf-token.json | jq -r '.data.token')
+            export ARM_CLIENT_ID=$(cat /tmp/workspace/client-creds.json | jq -r '.data.client_id')
+            export ARM_CLIENT_SECRET=$(cat /tmp/workspace/client-creds.json | jq -r '.data.client_secret')
+            export ARM_SUBSCRIPTION_ID=$(cat /tmp/workspace/env-creds.json | jq -r '.data.data.subscription_id')
+            export ARM_TENANT_ID=$(cat /tmp/workspace/env-creds.json | jq -r '.data.data.tenant_id')
+
+            cd tf-tfc
+            ls -ltr
+            cat \<< EOF > .terraformrc
+            credentials "app.terraform.io" {
+               token = "${TFC_TOKEN}"
+            }
+            EOF
+
+            export TF_CLI_CONFIG_FILE=.terraformrc
+            terraform init
+            export TFE_TOKEN=${TFC_TOKEN}
+            export TF_VAR_workspace_id=${WS_ID}
+            export TF_VAR_arm_client_id=${ARM_CLIENT_ID}
+            export TF_VAR_arm_client_secret=${ARM_CLIENT_SECRET}
+            export TF_VAR_arm_tenant_id=${ARM_TENANT_ID}
+            export TF_VAR_arm_sub_id=${ARM_SUBSCRIPTION_ID}
+            terraform destroy -auto-approve
+            terraform apply -auto-approve
+
   provision-infra:
     executor: tf-executor
     steps:
@@ -78,13 +100,7 @@ jobs:
       - run:
           name: "Make TFC"
           command: |
-            apk add jq
-            apk add curl
-            export TFC_TOKEN=$(cat /tmp/workspace/tf-token.json | jq -r '.data.token')
-            export ARM_CLIENT_ID=$(cat /tmp/workspace/client-creds.json | jq -r '.data.client_id')
-            export ARM_CLIENT_SECRET=$(cat /tmp/workspace/client-creds.json | jq -r '.data.client_secret')
-            export ARM_SUBSCRIPTION_ID=$(cat /tmp/workspace/env-creds.json | jq -r '.data.data.subscription_id')
-            export ARM_TENANT_ID=$(cat /tmp/workspace/env-creds.json | jq -r '.data.data.tenant_id')
+            apk add jq curl
 
             curl \
             --header "Authorization: Bearer ${TFC_TOKEN}" \
@@ -98,6 +114,9 @@ jobs:
 
             WS_NAME=$(cat ws-name)
             ORG_NAME=$(cat org-name)
+
+            git clone https://github.com/tkaburagi/tf-vault-github-actions-src
+            cd tf-vault-github-actions-src
 
             cat \<< EOF > main.tf
             terraform {
@@ -114,8 +133,9 @@ jobs:
             }
             EOF
 
-            cat main.tf
             ls -ltrR
+
+
 
             rm /tmp/workspace/*.json
             ls -ltrR /tmp/workspace
