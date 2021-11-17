@@ -63,7 +63,7 @@ jobs:
           name: "Import Azure Secrets from Vault"
           command: |
             pwd
-            apk add jq
+            apk add jq terraform
             vault read -format json azure/creds/contributor > workspace/client-creds.json
             vault kv get -format json secret/azure/environment > workspace/env-creds.json
 
