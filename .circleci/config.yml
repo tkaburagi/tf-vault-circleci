@@ -26,12 +26,12 @@ jobs:
             apk add jq
             export TFC_TOKEN=$(vault read -format json tfc/creds/ci-user | jq -r '.data.token')
 
-            echo "{" > workspace/ids-output.json
-            echo "  \"tfc_token\": \"${TFC_TOKEN}\"," >> workspace/ids-output.json
-            echo "}" >> workspace/ids-output.json
+            echo "{" > workspace/tf-token-output.json
+            echo "  \"tfc_token\": \"${TFC_TOKEN}\"," >> workspace/tf-token-output.json
+            echo "}" >> workspace/tf-token-output.json
 
-            cat workspace/ids-output.json
-#      - persist_to_workspace:
-#          root: workspace
-#          paths:
-#            - ids-output.json
+            cat workspace/itf-token-output.json
+      - persist_to_workspace:
+          root: workspace
+          paths:
+            - tf-token-output.json
