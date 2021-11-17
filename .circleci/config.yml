@@ -3,6 +3,9 @@ workflows:
   azure-infra-provision:
     jobs:
       - generate-tfc-token
+      - terraform-test:
+          requires:
+            - generate-tfc-token
 version: 2.1
 executors:
   tf-executor:
@@ -35,3 +38,16 @@ jobs:
           root: workspace
           paths:
             - tf-token-output.json
+  terraform-test:
+    executor: tf-executor
+    steps:
+      - run: mkdir workspace
+      - run:
+          name: "Terraform Test"
+          command: |
+            pwd
+            terraform -version
+            ls -ltr
+            terraform fmt -diff=true
+            terraform init
+            terraform validate
