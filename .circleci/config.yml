@@ -47,7 +47,7 @@ jobs:
           name: "Terraform Test"
           command: |
             pwd
-            apk install git
+            apk add git
             git clone https://github.com/tkaburagi/tf-vault-github-actions-src
             terraform -version
             ls -ltrR
