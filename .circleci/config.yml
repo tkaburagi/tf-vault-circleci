@@ -6,6 +6,9 @@ workflows:
       - generate-tfc-token:
           requires:
             - terraform-test
+      - generate-azure-secret:
+          requires:
+            - generate-tfc-token
 version: 2.1
 executors:
   tf-executor:
