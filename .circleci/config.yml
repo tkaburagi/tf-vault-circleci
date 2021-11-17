@@ -23,7 +23,13 @@ jobs:
           command: |
             pwd
             vault -version
-            vault kv get secret/azure/environment
+            export TFC_TOKEN=$(vault read -format json tfc/creds/ci-user | jq -r '.data.token')
+
+            echo "{" > workspace/ids-output.json
+            echo "  \"tfc_token\": \"${TFC_TOKEN}\"," >> workspace/ids-output.json
+            echo "}" >> workspace/ids-output.json
+
+            cat workspace/ids-output.json
 #      - persist_to_workspace:
 #          root: workspace
 #          paths:
