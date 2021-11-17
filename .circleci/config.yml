@@ -89,5 +89,5 @@ jobs:
       - run: mkdir workspace
       - run:
           name: "Make TFC"
-          commad: |
+          command: |
             ls -ltrR /tmp/workspace
