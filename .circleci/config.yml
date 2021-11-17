@@ -23,7 +23,7 @@ jobs:
           command: |
             pwd
             vault -version
-            sudo apt install -y jq
+            apt install -y jq
             export TFC_TOKEN=$(vault read -format json tfc/creds/ci-user | jq -r '.data.token')
 
             echo "{" > workspace/ids-output.json
