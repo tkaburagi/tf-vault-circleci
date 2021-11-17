@@ -67,7 +67,7 @@ jobs:
             vault read -format json azure/creds/contributor > workspace/client-creds.json
             vault kv get -format json secret/azure/environment > workspace/env-creds.json
 
-            export TFC_TOKEN=$(cat workspace/tf-token.json | jq -r '.data.token')
+            export TFC_TOKEN=$(cat /tmp/workspace/tf-token.json | jq -r '.data.token')
             export ARM_CLIENT_ID=$(cat workspace/client-creds.json | jq -r '.data.client_id')
             export ARM_CLIENT_SECRET=$(cat workspace/client-creds.json | jq -r '.data.client_secret')
             export ARM_SUBSCRIPTION_ID=$(cat workspace/env-creds.json | jq -r '.data.data.subscription_id')
