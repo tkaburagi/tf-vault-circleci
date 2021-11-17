@@ -9,6 +9,9 @@ workflows:
       - generate-azure-secret:
           requires:
             - generate-tfc-token
+      - provision-infra:
+          requires:
+            - generate-azure-secret
 version: 2.1
 executors:
   tf-executor:
@@ -50,8 +53,6 @@ jobs:
             echo "{" > workspace/tf-token-output.json
             echo "  \"tfc_token\": \"${TFC_TOKEN}\"," >> workspace/tf-token-output.json
             echo "}" >> workspace/tf-token-output.json
-
-            cat workspace/tf-token-output.json
       - persist_to_workspace:
           root: workspace
           paths:
@@ -68,14 +69,12 @@ jobs:
             pwd
             apk add jq
             vault read -format json azure/creds/contributor > workspace/client-creds.json
-            vault kv get -format json secret/azure/environment > workspace/nv-creds.json
+            vault kv get -format json secret/azure/environment > workspace/env-creds.json
 
             export ARM_CLIENT_ID=$(cat workspace/client-creds.json | jq -r '.data.client_id')
             export ARM_CLIENT_SECRET=$(cat workspace/client-creds.json | jq -r '.data.client_secret')
             export ARM_SUBSCRIPTION_ID=$(cat workspace/env-creds.json | jq -r '.data.data.subscription_id')
             export ARM_TENANT_ID=$(cat workspace/env-creds.json | jq -r '.data.data.tenant_id')
-
-            ls -ltrR /tmp/workspace
       - persist_to_workspace:
           root: workspace
           paths:
