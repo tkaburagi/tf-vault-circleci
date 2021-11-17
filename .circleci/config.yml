@@ -2,10 +2,10 @@ workflows:
   version: 2.1
   azure-infra-provision:
     jobs:
-      - generate-tfc-token
-      - terraform-test:
+      - terraform-test
+      - generate-tfc-token:
           requires:
-            - generate-tfc-token
+            - terraform-test
 version: 2.1
 executors:
   tf-executor:
@@ -17,6 +17,21 @@ executors:
       - image: hashicorp/vault
     working_directory: /home/vault
 jobs:
+  terraform-test:
+    executor: tf-executor
+    steps:
+      - run:
+          name: "Terraform Test"
+          command: |
+            pwd
+            apk add git
+            git clone https://github.com/tkaburagi/tf-vault-github-actions-src
+            terraform -version
+            ls -ltrR
+            cd tf-vault-github-actions-src
+            terraform fmt -diff=true
+            terraform init
+            terraform validate
   generate-tfc-token:
     executor: vault-executor
     steps:
@@ -38,20 +53,26 @@ jobs:
           root: workspace
           paths:
             - tf-token-output.json
-  terraform-test:
-    executor: tf-executor
+  generate-azure-secret:
+    executor: vault-executor
     steps:
       - attach_workspace:
           at: /tmp/workspace
       - run:
-          name: "Terraform Test"
+          name: "Import Azure Secrets from Vault"
           command: |
             pwd
-            apk add git
-            git clone https://github.com/tkaburagi/tf-vault-github-actions-src
-            terraform -version
-            ls -ltrR
-            cd tf-vault-github-actions-src
-            terraform fmt -diff=true
-            terraform init
-            terraform validate
+            vault read -format json azure/creds/contributor > client-creds.json
+            vault kv get -format json secret/azure/environment > env-creds.json
+
+            export ARM_CLIENT_ID=$(cat client-creds.json | jq -r '.data.client_id')
+            export ARM_CLIENT_SECRET=$(cat client-creds.json | jq -r '.data.client_secret')
+            export ARM_SUBSCRIPTION_ID=$(cat env-creds.json | jq -r '.data.data.subscription_id')
+            export ARM_TENANT_ID=$(cat env-creds.json | jq -r '.data.data.tenant_id')
+
+            echo ${ARM_CLIENT_ID}
+            echo ${ARM_SUBSCRIPTION_ID}
+
+            rm env-creds.json
+            rm client-creds.json
+
