@@ -47,9 +47,7 @@ jobs:
           command: |
             pwd
             vault -version
-            apk add jq
-
-            vault read -format json tfc/creds/ci-use > workspace/tf-token.json
+            vault read -format json tfc/creds/ci-user > workspace/tf-token.json
       - persist_to_workspace:
           root: workspace
           paths:
