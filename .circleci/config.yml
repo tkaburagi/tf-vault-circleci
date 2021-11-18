@@ -12,6 +12,7 @@ workflows:
       - provision-infra:
           requires:
             - generate-azure-secret
+      -
 version: 2.1
 executors:
   tf-executor:
@@ -26,12 +27,13 @@ jobs:
   terraform-test:
     executor: tf-executor
     steps:
+      - checkout
       - run:
           name: "Terraform Test"
           command: |
             pwd
             apk add git
-            git clone https://github.com/tkaburagi/tf-vault-github-actions-src
+#            git clone https://github.com/tkaburagi/tf-vault-github-actions-src
             terraform -version
             ls -ltrR
             cd tf-vault-github-actions-src
@@ -98,6 +100,7 @@ jobs:
   provision-infra:
     executor: tf-executor
     steps:
+      - checkout
       - attach_workspace:
           at: /tmp/workspace
       - run:
@@ -158,3 +161,13 @@ jobs:
             rm ./tf.tar.gz
             rm /tmp/workspace/*.json
             ls -ltrR /tmp/workspace
+  specurative-plan:
+    executor: tf-executor
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          name: "Make TFC"
+          command: |
+            pwd
