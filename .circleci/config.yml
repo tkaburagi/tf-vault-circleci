@@ -46,7 +46,6 @@ jobs:
             apk add git
             terraform -version
             ls -ltrR
-            cd tf-vault-github-actions-src
             terraform fmt -diff=true
             terraform init
             terraform validate
