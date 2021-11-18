@@ -130,9 +130,6 @@ jobs:
             WS_NAME=$(cat ws-name)
             ORG_NAME=$(cat org-name)
 
-            git clone https://github.com/tkaburagi/tf-vault-github-actions-src
-            cd tf-vault-github-actions-src
-
             cat \<< EOF > main.tf
             terraform {
               backend "remote" {
@@ -152,13 +149,13 @@ jobs:
             tar -zcvf tf.tar.gz -C . main.tf output.tf variables.tf azure.tf
             echo '{"data":{"type":"configuration-version"}}' > ./create_config_version.json
 
-            UPLOAD_URL=($(curl \
+            UPLOAD_URL=$(curl \
               --header "Authorization: Bearer ${TFC_TOKEN}" \
               --header "Content-Type: application/vnd.api+json" \
               --request POST \
               --data @create_config_version.json \
               https://app.terraform.io/api/v2/workspaces/${WS_ID}/configuration-versions \
-              | jq -r '.data.attributes."upload-url"'))
+              | jq -r '.data.attributes."upload-url"')
 
             curl \
               --header "Content-Type: application/octet-stream" \
