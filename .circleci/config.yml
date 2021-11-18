@@ -104,8 +104,8 @@ jobs:
             terraform destroy -auto-approve
             terraform apply -auto-approve
 
-            rm workspace/client-creds.json
-            rm workspace/env-creds.json
+            rm ../workspace/client-creds.json
+            rm ../workspace/env-creds.json
   provision-infra:
     executor: tf-executor
     steps:
