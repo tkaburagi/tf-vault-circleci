@@ -33,7 +33,6 @@ jobs:
           command: |
             pwd
             apk add git
-#            git clone https://github.com/tkaburagi/tf-vault-github-actions-src
             terraform -version
             ls -ltrR
             cd tf-vault-github-actions-src
