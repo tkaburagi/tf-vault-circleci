@@ -12,7 +12,15 @@ workflows:
       - provision-infra:
           requires:
             - generate-azure-secret
-      -
+            - generate-tfc-token
+      - specurative-plan:
+          requires:
+            - generate-azure-secret
+            - generate-tfc-token
+          filters:
+            branches:
+              only:
+                - dev
 version: 2.1
 executors:
   tf-executor:
