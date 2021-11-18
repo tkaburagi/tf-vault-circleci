@@ -26,7 +26,7 @@ executors:
   tf-executor:
     docker:
       - image: hashicorp/terraform
-    working_directory: /tmp
+    working_directory: /home/terraform
   vault-executor:
     docker:
       - image: hashicorp/vault
