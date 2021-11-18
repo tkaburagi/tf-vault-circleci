@@ -31,7 +31,7 @@ executors:
     docker:
       - image: hashicorp/vault
     working_directory: /home/vault
-　gen-executor:
+  general-executor:
     docker:
       - image: circleci/node:4.8.2
 jobs:
@@ -110,7 +110,7 @@ jobs:
             rm ../workspace/client-creds.json
             rm ../workspace/env-creds.json
   provision-infra:
-    executor: gen-executor
+    executor: general-executor
     steps:
       - checkout
       - attach_workspace:
