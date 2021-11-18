@@ -149,13 +149,13 @@ jobs:
             tar -zcvf tf.tar.gz -C . main.tf output.tf variables.tf azure.tf
             echo '{"data":{"type":"configuration-version"}}' > ./create_config_version.json
 
-            export UPLOAD_URL=($(curl \
+            export UPLOAD_URL=$(curl \
              --header "Authorization: Bearer ${TF_TOKEN}" \
              --header "Content-Type: application/vnd.api+json" \
              --request POST \
              --data @create_config_version.json \
-             https://app.terraform.io/api/v2/workspaces/${TF_WORKSPACE_ID}/configuration-versions \
-             | jq -r '.data.attributes."upload-url"'))
+             https://app.terraform.io/api/v2/workspaces/${WS_ID}/configuration-versions \
+             | jq -r '.data.attributes."upload-url"')
 
             echo "DEBUG: "${UPLOAD_URL}
 
