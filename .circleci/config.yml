@@ -31,6 +31,9 @@ executors:
     docker:
       - image: hashicorp/vault
     working_directory: /home/vault
+　gen-executor:
+    docker:
+      - image: circleci/node:4.8.2
 jobs:
   terraform-test:
     executor: tf-executor
@@ -107,7 +110,7 @@ jobs:
             rm ../workspace/client-creds.json
             rm ../workspace/env-creds.json
   provision-infra:
-    executor: tf-executor
+    executor: gen-executor
     steps:
       - checkout
       - attach_workspace:
@@ -115,8 +118,6 @@ jobs:
       - run:
           name: "Make TFC"
           command: |
-            apk add jq curl
-
             curl \
             --header "Authorization: Bearer ${TFC_TOKEN}" \
             --header "Content-Type: application/vnd.api+json" \
