@@ -36,6 +36,9 @@ jobs:
     executor: tf-executor
     steps:
       - checkout
+      - attach_workspace:
+          at: /tmp/workspace
+      - run: mkdir workspace
       - run:
           name: "Terraform Test"
           command: |
