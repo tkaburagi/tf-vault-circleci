@@ -118,6 +118,8 @@ jobs:
       - run:
           name: "Make TFC"
           command: |
+            export TFC_TOKEN=$(cat /tmp/workspace/tf-token.json | jq -r '.data.token')
+
             curl \
             --header "Authorization: Bearer ${TFC_TOKEN}" \
             --header "Content-Type: application/vnd.api+json" \
