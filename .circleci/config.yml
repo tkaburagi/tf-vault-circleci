@@ -146,12 +146,14 @@ jobs:
             }
             EOF
 
+            cat main.tf
+
             ls -ltrR
             tar -zcvf tf.tar.gz -C . main.tf output.tf variables.tf azure.tf
             echo '{"data":{"type":"configuration-version"}}' > create_config_version.json
 
-            echo $TFC_TOKEN
-            echo $WS_ID
+            echo "TFCTOKEN="$TFC_TOKEN
+            echo "WS_ID="$WS_ID
 
             export UPLOAD_URL=($(curl \
             --header "Authorization: Bearer ${TFC_TOKEN}" \
