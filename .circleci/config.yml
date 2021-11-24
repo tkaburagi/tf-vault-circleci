@@ -226,7 +226,9 @@ jobs:
               --request POST \
               --data @create_config_version.json \
               https://app.terraform.io/api/v2/workspaces/${WS_ID}/configuration-versions > output.json
+
             export UPLOAD_URL=$(cat output.json | jq -r '.data.attributes."upload-url"')
+            export CV_ID=$(cat output.json | jq -r '.data."id"')
 
             curl \
               --header "Content-Type: application/octet-stream" \
