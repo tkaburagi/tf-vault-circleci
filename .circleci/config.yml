@@ -184,6 +184,7 @@ jobs:
       - run:
           name: "Make TFC"
           command: |
+            apk add jq curl
             export TFC_TOKEN=$(cat /tmp/workspace/tf-token.json | jq -r '.data.token')
 
             curl \
