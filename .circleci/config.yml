@@ -13,6 +13,10 @@ workflows:
           requires:
             - generate-azure-secret
             - generate-tfc-token
+          filters:
+            branches:
+              only:
+                - main
       - specurative-plan:
           requires:
             - generate-azure-secret
@@ -154,17 +158,12 @@ jobs:
             tar -zcvf tf.tar.gz -C . main.tf output.tf variables.tf azure.tf
             echo '{"data":{"type":"configuration-version"}}' > create_config_version.json
 
-            echo "TFCTOKEN="$TFC_TOKEN
-            echo "WS_ID="$WS_ID
-
             export UPLOAD_URL=($(curl \
             --header "Authorization: Bearer ${TFC_TOKEN}" \
             --header "Content-Type: application/vnd.api+json" \
             --request POST \
             --data @create_config_version.json \
               https://app.terraform.io/api/v2/workspaces/${WS_ID}/configuration-versions | jq -r '.data.attributes."upload-url"'))
-
-            echo "DEBUG: "${UPLOAD_URL}
 
             curl \
             --header "Content-Type: application/octet-stream" \
@@ -185,4 +184,96 @@ jobs:
       - run:
           name: "Make TFC"
           command: |
-            pwd
+            export TFC_TOKEN=$(cat /tmp/workspace/tf-token.json | jq -r '.data.token')
+
+            curl \
+            --header "Authorization: Bearer ${TFC_TOKEN}" \
+            --header "Content-Type: application/vnd.api+json" \
+              https://app.terraform.io/api/v2/workspaces/${WS_ID} | jq -r '.data.relationships.organization.data.id' > org-name
+
+            curl \
+            --header "Authorization: Bearer ${TFC_TOKEN}" \
+            --header "Content-Type: application/vnd.api+json" \
+              https://app.terraform.io/api/v2/workspaces/${WS_ID} | jq -r '.data.attributes.name' > ws-name
+
+            WS_NAME=$(cat ws-name)
+            ORG_NAME=$(cat org-name)
+
+            cat \<< EOF > main.tf
+            terraform {
+              backend "remote" {
+                organization = "${ORG_NAME}"
+                workspaces {
+                  name = "${WS_NAME}"
+                }
+              }
+            }
+
+            provider "azurerm" {
+              features {}
+            }
+            EOF
+
+            cat main.tf
+            ls -ltrR
+            tar -zcvf tf.tar.gz -C . main.tf output.tf variables.tf azure.tf
+            echo '{"data":{"type":"configuration-versions","attributes":{"auto-queue-runs":false,"speculative":true}}}' > ./create_config_version.json
+
+            curl \
+              --header "Authorization: Bearer ${TFC_TOKEN}" \
+              --header "Content-Type: application/vnd.api+json" \
+              --request POST \
+              --data @create_config_version.json \
+              https://app.terraform.io/api/v2/workspaces/${WS_ID}/configuration-versions > output.json
+            export UPLOAD_URL=$(cat output.json | jq -r '.data.attributes."upload-url"')
+
+            curl \
+              --header "Content-Type: application/octet-stream" \
+              --request PUT \
+              --data-binary @tf.tar.gz \
+              $UPLOAD_URL
+
+            rm ./create_config_version.json
+            rm ./tf.tar.gz
+
+            cat \<< EOF > payload.json
+            {
+              "data": {
+                "attributes": {
+                  "message": "Specurative Plan"
+                },
+                "type": "runs",
+                "relationships": {
+                  "workspace": {
+                    "data": {
+                      "type": "workspaces",
+                      "id": "${WS_ID}"
+                    }
+                  },
+                  "configuration-version": {
+                    "data": {
+                      "type": "configuration-versions",
+                      "id": "${CV_ID}"
+                    }
+                  }
+                }
+              }
+            }
+            EOF
+
+            curl \
+            --header "Authorization: Bearer ${TFC_TOKEN}" \
+            --header "Content-Type: application/vnd.api+json" \
+            --request POST \
+            --data @payload.json \
+            https://app.terraform.io/api/v2/runs | jq -r '.data.id' > run-id
+
+            curl \
+            --header "Authorization: Bearer ${TFC_TOKEN}" \
+            --header "Content-Type: application/vnd.api+json" \
+            https://app.terraform.io/api/v2/workspaces/${WS_ID} | jq -r '.data.attributes.name' > ws-name
+
+            ORG_NAME=$(cat org-name)
+            RUN_ID=$(cat run-id)
+            WS_NAME=$(cat ws-name)
+            echo "RUN URL: https://app.terraform.io/app/${ORG_NAME}/workspaces/${WS_NAME}/runs/${RUN_ID}"
