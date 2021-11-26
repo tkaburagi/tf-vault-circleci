@@ -2,7 +2,16 @@ workflows:
   version: 2.1
   azure-infra-provision:
     jobs:
-      - validate-repo
+      - validate-repo-main:
+          filters:
+            branches:
+              only:
+                - main
+      - validate-repo-dev:
+          filters:
+            branches:
+              only:
+                - dev
       - terraform-test:
           requires:
             - validate-repo
@@ -45,7 +54,7 @@ executors:
     docker:
       - image: circleci/golang:1.11.1
 jobs:
-  validate-repo:
+  validate-repo-main:
     executor: circleci-executor
     steps:
       - checkout
@@ -53,6 +62,17 @@ jobs:
           name: "Validate Changed Directory"
           command: |
             if ! bin/is_changed.sh "tf-azure" -a "${CIRCLE_BRANCH}" != "main"; then
+              echo "tf-azure is not changed"
+              exit 1
+            fi
+  validate-repo-dev:
+    executor: circleci-executor
+    steps:
+      - checkout
+      - run:
+          name: "Validate Changed Directory"
+          command: |
+            if ! bin/is_changed.sh "tf-azure" -a "${CIRCLE_BRANCH}" != "dev"; then
               echo "tf-azure is not changed"
               exit 1
             fi
