@@ -14,7 +14,8 @@ workflows:
                 - dev
       - terraform-test:
           requires:
-            - validate-repo
+            - validate-repo-main
+            - validate-repo-dev
       - generate-tfc-token:
           requires:
             - terraform-test
