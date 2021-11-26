@@ -54,7 +54,7 @@ jobs:
           command: |
             if ! bin/is_changed.sh "tf-azure" -a "${CIRCLE_BRANCH}" != "main"; then
               echo "tf-azure is not changed"
-              circleci step halt
+              exit 1
             fi
   terraform-test:
     executor: tf-executor
