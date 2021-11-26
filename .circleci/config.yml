@@ -1,8 +1,5 @@
 workflows:
   version: 2.1
-  script_setup: &script_setup
-    command: |
-      echo 'export PATH=$PATH:${CIRCLE_WORKING_DIRECTORY}/bin' >> $BASH_ENV
   azure-infra-provision:
     jobs:
       - validate-repo
@@ -53,11 +50,9 @@ jobs:
     steps:
       - checkout
       - run:
-          <<: *script_setup
-      - run:
           name: "Validate Changed Directory"
           command: |
-            if ! is_changed.sh "tf-azure" -a "${CIRCLE_BRANCH}" != "main"; then
+            if ! bin/is_changed.sh "tf-azure" -a "${CIRCLE_BRANCH}" != "main"; then
               echo "tf-azure is not changed"
               circleci step halt
             fi
