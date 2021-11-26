@@ -1,5 +1,5 @@
 resource "azurerm_virtual_machine" "main" {
-  name                  = "my-vm-${count.index}"
+  name                  = "kabu-vm-${count.index}"
   count = var.hello_tf_instance_count
   location              = var.location
   resource_group_name   = var.rg
