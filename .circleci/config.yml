@@ -190,7 +190,7 @@ jobs:
             }
             EOF
 
-            cat main.tf
+            cat azure.tf
 
             ls -ltrR
             tar -zcvf tf.tar.gz -C . main.tf output.tf variables.tf azure.tf
@@ -253,7 +253,7 @@ jobs:
             }
             EOF
 
-            cat main.tf
+            cat azure.tf
             ls -ltrR
             tar -zcvf tf.tar.gz -C . main.tf output.tf variables.tf azure.tf
             echo '{"data":{"type":"configuration-versions","attributes":{"auto-queue-runs":false,"speculative":true}}}' > ./create_config_version.json
