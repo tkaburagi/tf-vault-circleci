@@ -212,6 +212,7 @@ jobs:
             rm ./create_config_version.json
             rm ./tf.tar.gz
             rm /tmp/workspace/*.json
+            rm *.tf
             ls -ltrR /tmp/workspace
   specurative-plan:
     executor: tf-executor
