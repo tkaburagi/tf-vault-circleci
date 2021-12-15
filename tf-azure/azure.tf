@@ -37,7 +37,7 @@
 #    private_ip_address_allocation = "Dynamic"
 #  }
 #  tags = {
-#    environment = "payground"
+#    environment = "playground"
 #  }
 #}
 #resource "azurerm_virtual_network" "example" {
