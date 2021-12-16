@@ -62,7 +62,7 @@ jobs:
       - run:
           name: "Validate Changed Directory"
           command: |
-            if ! bin/is_changed.sh "tf-azure" -a "${CIRCLE_BRANCH}" != "main"; then
+            if ! bin/is_changed.sh "." -a "${CIRCLE_BRANCH}" != "main"; then
               echo "tf-azure is not changed"
               exit 1
             fi
@@ -73,7 +73,7 @@ jobs:
       - run:
           name: "Validate Changed Directory"
           command: |
-            if ! bin/is_changed.sh "tf-azure" -a "${CIRCLE_BRANCH}" != "dev"; then
+            if ! bin/is_changed.sh "." -a "${CIRCLE_BRANCH}" != "dev"; then
               echo "tf-azure is not changed"
               exit 1
             fi
