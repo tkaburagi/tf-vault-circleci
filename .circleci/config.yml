@@ -2,20 +2,17 @@ workflows:
   version: 2.1
   azure-infra-provision:
     jobs:
-      - validate-repo-main:
-          filters:
-            branches:
-              only:
-                - main
-      - validate-repo-dev:
-          filters:
-            branches:
-              only:
-                - dev
-      - terraform-test:
-          requires:
-            - validate-repo-main
-            - validate-repo-dev
+#      - validate-repo-main:
+#          filters:
+#            branches:
+#              only:
+#                - main
+#      - validate-repo-dev:
+#          filters:
+#            branches:
+#              only:
+#                - dev
+      - terraform-test
       - generate-tfc-token:
           requires:
             - terraform-test
@@ -55,28 +52,28 @@ executors:
     docker:
       - image: circleci/golang:1.11.1
 jobs:
-  validate-repo-main:
-    executor: circleci-executor
-    steps:
-      - checkout
-      - run:
-          name: "Validate Changed Directory"
-          command: |
-            if ! bin/is_changed.sh "." -a "${CIRCLE_BRANCH}" != "main"; then
-              echo "tf-azure is not changed"
-              exit 1
-            fi
-  validate-repo-dev:
-    executor: circleci-executor
-    steps:
-      - checkout
-      - run:
-          name: "Validate Changed Directory"
-          command: |
-            if ! bin/is_changed.sh "." -a "${CIRCLE_BRANCH}" != "dev"; then
-              echo "tf-azure is not changed"
-              exit 1
-            fi
+#  validate-repo-main:
+#    executor: circleci-executor
+#    steps:
+#      - checkout
+#      - run:
+#          name: "Validate Changed Directory"
+#          command: |
+#            if ! bin/is_changed.sh "." -a "${CIRCLE_BRANCH}" != "main"; then
+#              echo "tf-azure is not changed"
+#              exit 1
+#            fi
+#  validate-repo-dev:
+#    executor: circleci-executor
+#    steps:
+#      - checkout
+#      - run:
+#          name: "Validate Changed Directory"
+#          command: |
+#            if ! bin/is_changed.sh "." -a "${CIRCLE_BRANCH}" != "dev"; then
+#              echo "tf-azure is not changed"
+#              exit 1
+#            fi
   terraform-test:
     executor: tf-executor
     steps:
